@@ -1,6 +1,6 @@
 # Diseñar una aplicación que solicite al usuario un número e indique si es par o impar.
 
-# First, ask to user a number.
+# First, promp the user a number.
 numero = int(input("Please enter a number: "))
 
 # And now, show in the screen if the number choseen for the user is even or odd with a ternary
