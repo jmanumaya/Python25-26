@@ -2,6 +2,17 @@
 
 text = input("Please whrite a text: ")
 
-words = text.split()
+text = text.lower()
 
-print(type(words))
+words = text.split()
+frecuency = {}
+print(words)
+
+for word in words:
+    if word in frecuency:
+        frecuency[word] += 1
+    else:
+        frecuency[word] = 1
+
+print(frecuency)
+

@@ -10,7 +10,8 @@ for _ in range(8):
 
 for i in range(len(numbers)):
     iteration = numbers[i]
-    if (iteration % 2 == 0):
+    # Version Bitwise, Si el ultimo bit es 0 el numero es par 😎
+    if ((iteration & 1) == 0):
         print(f"{iteration} is even")
     else:
         print(f"{iteration} is odd")
