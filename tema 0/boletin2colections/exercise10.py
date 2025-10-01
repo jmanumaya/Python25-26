@@ -21,9 +21,6 @@ phrase = input("Please enter a word to encript: ").lower()
 new_phrase = ""
 
 for letter in phrase:
-    if letter in diccionary:
-        new_phrase += diccionary[letter]
-    else:
-        new_phrase += letter
+    new_phrase += diccionary.get(letter, letter)
 
 print(new_phrase)
