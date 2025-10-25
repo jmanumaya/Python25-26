@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+
+app = FastAPI()
 
 class Article(BaseModel):
-    id:int
-    title:str
-    body:str
-    date:str
-    idJournalist:int
+    id: int | None = None
+    title: str
+    body: str
+    date: str
+    idJournalist: int
 
 article_list = [
     Article(
@@ -32,50 +34,66 @@ article_list = [
     )
 ]
 
-app = FastAPI()
 
-@app.get("/articles")
+# ---------- FUNCIONES AUXILIARES ----------
+def next_id():
+    return (max(article_list, key=lambda x: x.id).id + 1) if article_list else 1
+
+def find_article_by_id(id: int):
+    return next((a for a in article_list if a.id == id), None)
+
+
+# ---------- ENDPOINTS ----------
+@app.get("/articles", response_model=list[Article])
 def get_articles():
     return article_list
 
-@app.get("/articles/id/{id_articles}")
-def get_articles_id(id_articles: int):
-    articles = [article for article in article_list if article.id == id_articles]
-    return articles[0] if articles else {"error": "Article not found"}
 
-@app.get("/articles/title/{title_articles}")
-def get_article_by_title(title_articles: str):
-    articles = [article for article in article_list if article.title == title_articles]
-    return articles[0] if articles else {"error": "Article not found"}
+@app.get("/articles/{id_article}", response_model=Article)
+def get_article_by_id(id_article: int):
+    article = find_article_by_id(id_article)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
 
-@app.get("/articles/date/{date_articles}")
-def get_article_by_date(date_articles: str):
-    articles = [article for article in article_list if article.date == date_articles]
-    return articles if articles else {"error": "Articles not found"}
 
-@app.post("/article", status_code=201)
-def add_article(articles: Article):
-    articles.id = next_id()
-    article_list.append(articles)
+@app.get("/articles/title/{title_article}", response_model=Article)
+def get_article_by_title(title_article: str):
+    article = next((a for a in article_list if a.title == title_article), None)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
+
+
+@app.get("/articles/date/{date_article}", response_model=list[Article])
+def get_articles_by_date(date_article: str):
+    articles = [a for a in article_list if a.date == date_article]
+    if not articles:
+        raise HTTPException(status_code=404, detail="No articles found for that date")
     return articles
 
-@app.put("/article/{id}", response_model=Article)
+
+@app.post("/articles", response_model=Article, status_code=201)
+def add_article(article: Article):
+    article.id = next_id()
+    article_list.append(article)
+    return article
+
+
+@app.put("/articles/{id}", response_model=Article)
 def modify_article(id: int, article: Article):
-    for index, saved_user in enumerate(article_list):
-        if saved_user.id == id:
+    for index, saved_article in enumerate(article_list):
+        if saved_article.id == id:
             article.id = id
             article_list[index] = article
             return article
-    
     raise HTTPException(status_code=404, detail="Article not found")
 
-@app.delete("/article/{id}")
-def delete_article(id:int):
-    for saved_article in article_list:
-        if saved_article.id == id:
-            article_list.remove(saved_article)
-            return {}
-    raise HTTPException(status_code=404, detail="Article not found")
 
-def next_id():
-    return (max(article_list, key=lambda x: x.id).id + 1) if article_list else 1
+@app.delete("/articles/{id}", status_code=204)
+def delete_article(id: int):
+    article = find_article_by_id(id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    article_list.remove(article)
+    return
