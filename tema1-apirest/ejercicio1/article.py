@@ -15,21 +15,21 @@ article_list = [
         id=1,
         title="El auge de los videojuegos indie",
         body="Cada vez más desarrolladores independientes logran destacar gracias a la innovación y el apoyo de la comunidad gamer.",
-        date="15/06/2025",
+        date="2025-06-15",
         idJournalist=1
     ),
     Article(
         id=2,
         title="Mapher Game lanza su nuevo título",
         body="El estudio sevillano Mapher Game sorprende con un juego de puzles espaciales que ya acumula miles de descargas.",
-        date="20/06/2025",
+        date="2025-06-20",
         idJournalist=2
     ),
     Article(
         id=3,
         title="La industria española del gaming en crecimiento",
         body="España se consolida como un referente en el desarrollo de videojuegos con estudios que apuestan por la creatividad y la tecnología.",
-        date="25/06/2025",
+        date="2025-06-15",
         idJournalist=3
     )
 ]
