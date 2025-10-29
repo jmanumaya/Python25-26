@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-app = FastAPI()
+router = APIRouter(prefix="/articles", tags=["articles"])
 
 class Article(BaseModel):
     id: int | None = None
@@ -44,12 +44,12 @@ def find_article_by_id(id: int):
 
 
 # ---------- ENDPOINTS ----------
-@app.get("/articles", response_model=list[Article])
+@router.get("/", response_model=list[Article])
 def get_articles():
     return article_list
 
 
-@app.get("/articles/{id_article}", response_model=Article)
+@router.get("/{id_article}", response_model=Article)
 def get_article_by_id(id_article: int):
     article = find_article_by_id(id_article)
     if not article:
@@ -57,7 +57,7 @@ def get_article_by_id(id_article: int):
     return article
 
 
-@app.get("/articles/title/{title_article}", response_model=Article)
+@router.get("/title/{title_article}", response_model=Article)
 def get_article_by_title(title_article: str):
     article = next((a for a in article_list if a.title == title_article), None)
     if not article:
@@ -65,7 +65,7 @@ def get_article_by_title(title_article: str):
     return article
 
 
-@app.get("/articles/date/{date_article}", response_model=list[Article])
+@router.get("/date/{date_article}", response_model=list[Article])
 def get_articles_by_date(date_article: str):
     articles = [a for a in article_list if a.date == date_article]
     if not articles:
@@ -73,14 +73,14 @@ def get_articles_by_date(date_article: str):
     return articles
 
 
-@app.post("/articles", response_model=Article, status_code=201)
+@router.post("/", response_model=Article, status_code=201)
 def add_article(article: Article):
     article.id = next_id()
     article_list.append(article)
     return article
 
 
-@app.put("/articles/{id}", response_model=Article)
+@router.put("/{id}", response_model=Article)
 def modify_article(id: int, article: Article):
     for index, saved_article in enumerate(article_list):
         if saved_article.id == id:
@@ -90,10 +90,10 @@ def modify_article(id: int, article: Article):
     raise HTTPException(status_code=404, detail="Article not found")
 
 
-@app.delete("/articles/{id}", status_code=204)
+@router.delete("/{id}", status_code=204)
 def delete_article(id: int):
     article = find_article_by_id(id)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     article_list.remove(article)
-    return
+    return {}

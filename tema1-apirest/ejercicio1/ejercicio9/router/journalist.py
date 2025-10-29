@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-app = FastAPI()
+router = APIRouter(prefix="/journalists", tags=["journalists"])
 
 class Journalist(BaseModel):
     id: int | None = None
@@ -27,12 +27,12 @@ def find_journalist_by_id(id: int):
 
 
 # ---------- ENDPOINTS ----------
-@app.get("/journalists", response_model=list[Journalist])
+@router.get("/", response_model=list[Journalist])
 def get_journalists():
     return list_journalists
 
 
-@app.get("/journalists/{id_journalist}", response_model=Journalist)
+@router.get("/{id_journalist}", response_model=Journalist)
 def get_journalist_by_id(id_journalist: int):
     journalist = find_journalist_by_id(id_journalist)
     if not journalist:
@@ -40,7 +40,7 @@ def get_journalist_by_id(id_journalist: int):
     return journalist
 
 
-@app.get("/journalists/dni/{dni_journalist}", response_model=Journalist)
+@router.get("/dni/{dni_journalist}", response_model=Journalist)
 def get_journalist_by_dni(dni_journalist: str):
     journalist = next((j for j in list_journalists if j.dni == dni_journalist), None)
     if not journalist:
@@ -48,7 +48,7 @@ def get_journalist_by_dni(dni_journalist: str):
     return journalist
 
 
-@app.get("/journalists/specialty/{specialty_journalist}", response_model=list[Journalist])
+@router.get("/specialty/{specialty_journalist}", response_model=list[Journalist])
 def get_journalist_by_specialty(specialty_journalist: str):
     result = [j for j in list_journalists if j.specialty == specialty_journalist]
     if not result:
@@ -56,14 +56,14 @@ def get_journalist_by_specialty(specialty_journalist: str):
     return result
 
 
-@app.post("/journalists", response_model=Journalist, status_code=201)
+@router.post("", response_model=Journalist, status_code=201)
 def add_journalist(journalist: Journalist):
     journalist.id = next_id()
     list_journalists.append(journalist)
     return journalist
 
 
-@app.put("/journalists/{id}", response_model=Journalist)
+@router.put("/{id}", response_model=Journalist)
 def modify_journalist(id: int, journalist: Journalist):
     for index, saved_journalist in enumerate(list_journalists):
         if saved_journalist.id == id:
@@ -73,10 +73,10 @@ def modify_journalist(id: int, journalist: Journalist):
     raise HTTPException(status_code=404, detail="Journalist not found")
 
 
-@app.delete("/journalists/{id}", status_code=204)
+@router.delete("/{id}", status_code=204)
 def delete_journalist(id: int):
     journalist = find_journalist_by_id(id)
     if not journalist:
         raise HTTPException(status_code=404, detail="Journalist not found")
     list_journalists.remove(journalist)
-    return
+    return {}
