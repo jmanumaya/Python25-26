@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
+from .auth_users import authentication
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -74,7 +75,7 @@ def get_articles_by_date(date_article: str):
 
 
 @router.post("/", response_model=Article, status_code=201)
-def add_article(article: Article):
+def add_article(article: Article, authorized = Depends(authentication)):
     article.id = next_id()
     article_list.append(article)
     return article

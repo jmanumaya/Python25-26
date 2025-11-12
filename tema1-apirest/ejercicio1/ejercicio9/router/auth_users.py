@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 
 import jwt
-
+from jwt import PyJWTError
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -81,19 +81,21 @@ async def login (form: OAuth2PasswordRequestForm = Depends()):
             raise HTTPException(status_code=400, detail=f"Error en la autenticación: {e}")
     raise HTTPException(status_code=401, detail="Usuario o contraseña icorrectos")
 
-# @router.post("/login")
-# async def login(form: OAuth2PasswordRequestForm = Depends()):
-#     user = users_db.get(form.username)
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
+async def authentication(token: str = Depends(oauth2)):
+    try:
+        username = jwt.decode(token, SECRET_KEY, algorithm=ALGORITHM).get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Credenciales de autenticacion invalidas",
+                                headers={"WWW-Authenticate" : "Bearer"})
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Credenciales de autenticacion invalidas",
+                                headers={"WWW-Authenticate" : "Bearer"})
+    
+    user = User(**users_db[username])
 
-#     # Verificar contraseña
-#     if not password_hash.verify(form.password, user["password"]):
-#         raise HTTPException(status_code=401, detail="Contraseña incorrecta")
-
-#     # Crear token
-#     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = {"sub": user["username"], "exp": expire}
-#     token = jwt.encode(access_token, SECRET_KEY, algorithm=ALGORITHM)
-
-#     return {"access_token": token, "token_type": "bearer"}
+    if user.disabled:
+        # Si el usuario está deshabilitado lanzamos execption
+        raise HTTPException(status_code=400, detail="Usuario inactivo")
+    
+    #Retornamos un usuario correcto y habilitado
+    return user
