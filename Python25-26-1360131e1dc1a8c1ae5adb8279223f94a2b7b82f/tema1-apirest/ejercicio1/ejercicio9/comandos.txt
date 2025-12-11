@@ -1,0 +1,8 @@
+1. Activar tu entorno virtual
+
+2. Una vez activado el entorno, instalar las librerías dentro de él:
+
+pip install "fastapi[standard]"
+pip install "pwdlib[argon2]"
+pip install pymongo
+pip install "PyJWT==1.7.1"
