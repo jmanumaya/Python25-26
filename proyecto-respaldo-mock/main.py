@@ -1,17 +1,26 @@
 from fastapi import FastAPI
-from router import journalist, article, auth_users, journalist_db, article_db
-from fastapi.staticfiles import StaticFiles
+from routers import trainers, clients, auth_users
 
-app = FastAPI()
+app = FastAPI(
+    title="Gym API",
+    description="API para gestión de entrenadores y clientes de gimnasio",
+    version="1.0.0"
+)
 
 # Routers
-app.include_router(trainer_db.router)
-# app.include_router(journalist.router)
-app.include_router(article_db.router)
-# app.include_router(article.router)
 app.include_router(auth_users.router)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(trainers.router)
+app.include_router(clients.router)
 
-@app.get("/")   
-def inicio():
-    return {"message": "Welcome to the News API"}
+@app.get("/")
+def root():
+    return {
+        "message": "Gym API",
+        "endpoints": {
+            "register": "/register",
+            "login": "/login",
+            "trainers": "/trainers",
+            "clients": "/clients",
+            "docs": "/docs"
+        }
+    }
