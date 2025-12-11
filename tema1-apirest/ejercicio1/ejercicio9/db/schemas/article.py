@@ -2,7 +2,7 @@
 
 def article_schema(article) -> dict:
     return {
-        "id": str(article["_id"]), # Convertimos el ObjectId de Mongo a String
+        "id": str(article["_id"]),
         "title": article["title"],
         "body": article["body"],
         "date": article["date"],

@@ -6,9 +6,9 @@ app = FastAPI()
 
 # Routers
 app.include_router(journalist_db.router)
-app.include_router(journalist.router)
+# app.include_router(journalist.router)
 app.include_router(article_db.router)
-app.include_router(article.router)
+# app.include_router(article.router)
 app.include_router(auth_users.router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

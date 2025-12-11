@@ -2,12 +2,12 @@
 
 def journalist_schema(journalist) -> dict:
     return {
-        "id": str(journalist["_id"]), # Convertimos el ObjectId de Mongo a String
+        "id": str(journalist["_id"]),
         "dni": journalist["dni"],
         "name": journalist["name"],
         "surname": journalist["surname"],
-        "telephone": journalist["telephone"], # Corregido (antes tenías age)
-        "specialty": journalist["specialty"]  # Agregado
+        "telephone": journalist["telephone"],
+        "specialty": journalist["specialty"]
     }
 
 def journalists_schema(journalists) -> list:
