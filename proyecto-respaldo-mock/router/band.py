@@ -10,7 +10,7 @@ router = APIRouter(prefix="/bandsdb", tags=["bandsdb"])
 
 @router.get("/", response_model=list[Band])
 async def get_bands():
-    return bands_schema(db_client.local.bands.find())
+    return bands_schema(db_client.newsdb.bands.find())
 
 
 @router.get("/{id}", response_model=Band)
@@ -33,11 +33,11 @@ async def add_band(band: Band):
     del band_dict["id"]
 
     # Insertamos
-    id = db_client.local.bands.insert_one(band_dict).inserted_id
+    id = db_client.newsdb.bands.insert_one(band_dict).inserted_id
 
     # Recuperamos el objeto creado para devolverlo
     # Usamos la conversión manual de ObjectId a str
-    new_band = band_schema(db_client.local.bands.find_one({"_id": id}))
+    new_band = band_schema(db_client.newsdb.bands.find_one({"_id": id}))
     
     return Band(**new_band)
 
@@ -49,7 +49,7 @@ async def modify_band(id: str, band: Band):
 
     try:
         # Buscamos y reemplazamos
-        db_client.local.bands.find_one_and_replace({"_id": ObjectId(id)}, band_dict)
+        db_client.newsdb.bands.find_one_and_replace({"_id": ObjectId(id)}, band_dict)
         # Devolvemos el objeto buscándolo de nuevo
         return search_band_id(id)
     except:
@@ -59,7 +59,7 @@ async def modify_band(id: str, band: Band):
 @router.delete("/{id}", response_model=Band)
 async def delete_band(id: str):
     try:
-        found = db_client.local.bands.find_one_and_delete({"_id": ObjectId(id)})
+        found = db_client.newsdb.bands.find_one_and_delete({"_id": ObjectId(id)})
         if not found:
              raise HTTPException(status_code=404, detail="Band not found")
         return Band(**band_schema(found))
@@ -71,14 +71,14 @@ async def delete_band(id: str):
 
 def search_band_id(id: str):
     try:
-        band = band_schema(db_client.local.bands.find_one({"_id": ObjectId(id)}))
+        band = band_schema(db_client.newsdb.bands.find_one({"_id": ObjectId(id)}))
         return Band(**band)
     except:
         return {"error": "Band not found"}
 
 def search_band_name(name: str):
     try:
-        band = band_schema(db_client.local.bands.find_one({"name": name}))
+        band = band_schema(db_client.newsdb.bands.find_one({"name": name}))
         return Band(**band)
     except:
         return {"error": "Band not found"}

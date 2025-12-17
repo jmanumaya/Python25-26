@@ -12,7 +12,7 @@ router = APIRouter(prefix="/albumsdb", tags=["albumsdb"])
 @router.get("/", response_model=list[Album])
 async def get_albums():
     # Devuelve todos los artículos de la colección
-    return albums_schema(db_client.local.albums.find())
+    return albums_schema(db_client.newsdb.albums.find())
 
 
 @router.get("/{id}", response_model=Album)
@@ -28,7 +28,7 @@ async def get_album_by_title(title: str):
 @router.get("/release_year/{release_year}", response_model=list[Album])
 async def get_albums_by_release_year(release_year: int):
     # Buscamos todos los artículos que coincidan con la fecha
-    albums = albums_schema(db_client.local.albums.find({"release_year": release_year}))
+    albums = albums_schema(db_client.newsdb.albums.find({"release_year": release_year}))
     
     if not albums:
         raise HTTPException(status_code=404, detail="No albums found for that date")
@@ -46,10 +46,10 @@ async def add_album(album: Album):
     del album_dict["id"]
     
     # Insertamos en la base de datos
-    id = db_client.local.albums.insert_one(album_dict).inserted_id
+    id = db_client.newsdb.albums.insert_one(album_dict).inserted_id
     
     # Recuperamos el artículo recién creado
-    new_album = album_schema(db_client.local.albums.find_one({"_id": id}))
+    new_album = album_schema(db_client.newsdb.albums.find_one({"_id": id}))
     
     return Album(**new_album)
 
@@ -61,7 +61,7 @@ async def modify_album(id: str, album: Album):
     
     try:
         # Buscamos y reemplazamos
-        db_client.local.albums.find_one_and_replace({"_id": ObjectId(id)}, album_dict)
+        db_client.newsdb.albums.find_one_and_replace({"_id": ObjectId(id)}, album_dict)
         # Devolvemos el objeto actualizado usando la función auxiliar
         return search_album_id(id)
     except:
@@ -72,7 +72,7 @@ async def modify_album(id: str, album: Album):
 async def delete_album(id: str):
     try:
         # Buscamos y borramos, guardando el documento borrado en 'found'
-        found = db_client.local.albums.find_one_and_delete({"_id": ObjectId(id)})
+        found = db_client.newsdb.albums.find_one_and_delete({"_id": ObjectId(id)})
         
         if not found:
              raise HTTPException(status_code=404, detail="Album not found")
@@ -87,14 +87,14 @@ async def delete_album(id: str):
 
 def search_album_id(id: str):
     try:
-        album = album_schema(db_client.local.albums.find_one({"_id": ObjectId(id)}))
+        album = album_schema(db_client.newsdb.albums.find_one({"_id": ObjectId(id)}))
         return Album(**album)
     except:
         return {"error": "Album not found"}
 
 def search_album_title(title: str):
     try:
-        album = album_schema(db_client.local.articles.find_one({"title": title}))
+        album = album_schema(db_client.newsdb.articles.find_one({"title": title}))
         return Album(**album)
     except:
         return {"error": "Album not found"}
