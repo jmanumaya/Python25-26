@@ -1,15 +1,20 @@
 from multiprocessing import Process, Queue
 import time
+import os
 
 def lector(cola):
-    with open("numeros.txt", "r") as f:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    ruta_archivo = os.path.join(script_dir, "numeros.txt")
+    
+    with open(ruta_archivo, "r") as f:
         for linea in f:
-            cola.put(int(linea.strip())) # Insertar en cola (Imagen III)
-    cola.put(None) # Señal de fin
+            cola.put(int(linea.strip())) 
+    cola.put(None)
 
 def sumador(cola):
     while True:
-        n = cola.get() # Obtener de cola (Imagen III)
+        n = cola.get() 
         if n is None:
             break
         print(f"Suma hasta {n}: {sum(range(1, n + 1))}")
