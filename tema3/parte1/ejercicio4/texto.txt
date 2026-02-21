@@ -1,0 +1,1 @@
+El módulo multiprocessing de Python permite la ejecución en paralelo.
